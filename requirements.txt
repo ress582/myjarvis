@@ -1,0 +1,11 @@
+flask
+flask-socketio
+edge-tts
+SpeechRecognition
+numpy
+google-generativeai
+pyngrok
+requests
+python-dotenv
+gunicorn
+eventlet
