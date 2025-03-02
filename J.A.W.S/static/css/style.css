@@ -1,0 +1,514 @@
+/* Main container styles */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background: #000;
+    padding: 20px;
+}
+
+/* Jarvis orb container */
+.jarvis-orb {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 20px auto;
+    cursor: pointer;
+    transform-style: preserve-3d;
+}
+
+/* Main orb sphere with enhanced Jarvis styling */
+.orb-sphere {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(0, 191, 255, 0.9),
+        rgba(0, 191, 255, 0.5) 30%,
+        rgba(0, 191, 255, 0.3) 50%,
+        rgba(0, 191, 255, 0.1) 70%
+    );
+    box-shadow: 
+        0 0 60px rgba(0, 191, 255, 0.6),
+        inset 0 0 50px rgba(255, 255, 255, 0.3);
+    animation: spherePulse 4s ease-in-out infinite;
+}
+
+/* Holographic rings */
+.jarvis-orb::before,
+.jarvis-orb::after {
+    content: '';
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 191, 255, 0.3);
+    animation: ringRotate 8s linear infinite;
+}
+
+.jarvis-orb::after {
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    border: 1px solid rgba(0, 191, 255, 0.2);
+    animation: ringRotate 12s linear infinite reverse;
+}
+
+/* Energy patterns */
+.jarvis-orb.speaking::before {
+    border-color: rgba(0, 191, 255, 0.8);
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.5);
+}
+
+.jarvis-orb.speaking .orb-sphere {
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(0, 191, 255, 1),
+        rgba(0, 191, 255, 0.7) 30%,
+        rgba(0, 191, 255, 0.4) 50%,
+        rgba(0, 191, 255, 0.2) 70%
+    );
+    box-shadow: 
+        0 0 80px rgba(0, 191, 255, 0.8),
+        inset 0 0 60px rgba(255, 255, 255, 0.5);
+}
+
+/* Animations */
+@keyframes spherePulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes ringRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Recording state */
+.jarvis-orb.recording .orb-sphere {
+    background: radial-gradient(
+        circle at 30% 30%,
+        rgba(255, 0, 0, 0.9),
+        rgba(255, 0, 0, 0.5) 30%,
+        rgba(255, 0, 0, 0.3) 50%,
+        rgba(255, 0, 0, 0.1) 70%
+    );
+    box-shadow: 
+        0 0 60px rgba(255, 0, 0, 0.6),
+        inset 0 0 50px rgba(255, 255, 255, 0.3);
+    animation: recordingPulse 1s ease-in-out infinite;
+}
+
+@keyframes recordingPulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* Ferrofluid-like blobs */
+.ferro-blob {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    filter: blur(8px);
+    mix-blend-mode: screen;
+}
+
+.ferro-blob:nth-child(1) {
+    background: radial-gradient(circle at 50% 50%, 
+        rgba(51, 153, 255, 0.8),
+        transparent 70%
+    );
+    animation: blobMove1 8s ease-in-out infinite;
+}
+
+.ferro-blob:nth-child(2) {
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(0, 102, 204, 0.6),
+        transparent 60%
+    );
+    animation: blobMove2 7s ease-in-out infinite;
+}
+
+/* Magnetic field lines */
+.magnetic-field {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    top: -10%;
+    left: -10%;
+    border: 2px solid rgba(51, 153, 255, 0.1);
+    border-radius: 50%;
+    animation: fieldRotate 20s linear infinite;
+}
+
+/* Animations */
+@keyframes orbPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes sphereGlow {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+@keyframes blobMove1 {
+    0%, 100% { transform: translate(-10%, -10%) scale(0.9); }
+    25% { transform: translate(10%, -5%) scale(1.1); }
+    50% { transform: translate(5%, 10%) scale(0.95); }
+    75% { transform: translate(-5%, 5%) scale(1.05); }
+}
+
+@keyframes blobMove2 {
+    0%, 100% { transform: translate(10%, 10%) scale(1.1); }
+    25% { transform: translate(-5%, 5%) scale(0.9); }
+    50% { transform: translate(-10%, -10%) scale(1.05); }
+    75% { transform: translate(5%, -5%) scale(0.95); }
+}
+
+@keyframes fieldRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Weather feature styles */
+.weather-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.weather-form input,
+.weather-form select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #3399ff;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #fff;
+}
+
+.weather-form button {
+    padding: 10px 15px;
+    background-color: #3399ff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.weather-form button:hover {
+    background-color: #1a75ff;
+}
+
+.weather-results {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.weather-card {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(51, 153, 255, 0.3);
+    color: white;
+    width: 100%;
+}
+
+.weather-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(51, 153, 255, 0.3);
+    padding-bottom: 10px;
+}
+
+.weather-time {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.weather-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.weather-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.weather-icon img {
+    width: 80px;
+    height: 80px;
+}
+
+.weather-temp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.weather-temp h2 {
+    font-size: 2.5em;
+    margin: 0;
+}
+
+.weather-details, .weather-sun {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.weather-details p, .weather-sun p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.forecast-container {
+    width: 100%;
+}
+
+.forecast-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.forecast-day {
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(51, 153, 255, 0.2);
+}
+
+.forecast-day h4 {
+    margin: 0 0 5px 0;
+    color: #3399ff;
+}
+
+.forecast-date {
+    font-size: 0.8em;
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+.forecast-day img {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto;
+}
+
+.forecast-desc {
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.forecast-temp {
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.forecast-precip {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+/* Audio visualization effect */
+.audio-wave {
+    position: absolute;
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    border: 1px solid rgba(51, 153, 255, 0.2);
+    border-radius: 50%;
+    animation: waveExpand 2s ease-in-out infinite;
+}
+
+@keyframes waveExpand {
+    0%, 100% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1); opacity: 0.5; }
+}
+
+/* Input styles */
+.input-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    position: relative;
+}
+
+.chat-input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid rgba(51, 153, 255, 0.3);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: rgba(51, 153, 255, 0.8);
+    box-shadow: 0 0 15px rgba(51, 153, 255, 0.3);
+}
+
+/* Response container */
+.response-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(51, 153, 255, 0.3);
+    border-radius: 10px;
+    color: #fff;
+}
+
+/* Appointment suggestion styles */
+.appointment-suggestion {
+    background-color: rgba(51, 153, 255, 0.1);
+    border: 1px solid rgba(51, 153, 255, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    margin: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.appointment-suggestion h4 {
+    color: #3399ff;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.appointment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.appointment-form input,
+.appointment-form textarea {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgba(51, 153, 255, 0.3);
+    background-color: rgba(0, 0, 0, 0.2);
+    color: #fff;
+}
+
+.suggestion-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.suggestion-buttons button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.suggestion-buttons button:first-child {
+    background-color: #3399ff;
+    color: white;
+}
+
+.suggestion-buttons button:last-child {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ccc;
+}
+
+.suggestion-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Media Queries for Responsive Design */
+@media screen and (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+
+    .jarvis-orb {
+        width: 150px;
+        height: 150px;
+        margin: 15px auto;
+    }
+
+    .welcome-text {
+        font-size: 24px;
+        margin-bottom: 15px;
+    }
+
+    .input-group {
+        width: 95%;
+        max-width: 400px;
+    }
+
+    .input-wrapper input {
+        font-size: 14px;
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .button-group button {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .jarvis-orb {
+        width: 120px;
+        height: 120px;
+        margin: 10px auto;
+    }
+
+    .welcome-text {
+        font-size: 20px;
+    }
+
+    .subtitle {
+        font-size: 14px;
+    }
+}
