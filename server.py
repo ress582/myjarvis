@@ -6,6 +6,8 @@ import asyncio
 import datetime
 import json
 import threading
+import logging
+from logging.handlers import RotatingFileHandler
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_socketio import SocketIO, emit
 import edge_tts
@@ -18,6 +20,22 @@ from pyngrok import ngrok
 from pyngrok.conf import PyngrokConfig
 from database import Database
 from weather import WeatherService
+
+# Configure logging
+log_dir = 'logs'
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, 'jaws.log')
+
+logger = logging.getLogger('jaws')
+logger.setLevel(logging.INFO)
+
+file_handler = RotatingFileHandler(log_file, maxBytes=1024*1024, backupCount=5)
+file_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
+logger.addHandler(file_handler)
+
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
+logger.addHandler(console_handler)
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading', ping_timeout=60)
@@ -333,10 +351,10 @@ def ask():
         f"   - Ask about setting recurring events when appropriate\n\n"
         
         f"4. TIME AWARENESS:\n"
-        f"   - ALWAYS reference current time in responses  IF APPROPRIATE NOT EVERY SECONG\n"
+        f"   - sometimes reference current time in responses IF APPROPRIATE NOT EVERY SECOND eg after it is a new day from last conversation\n"
         f"   - Use 24-hour format for ALL time references\n"
         f"   - Consider time of day when suggesting notification times\n"
-        f"   - Account for SCHOOL hours when scheduling\n"
+        f"   - Account for SCHOOL hours when scheduling\n\n"
     )
     
     if any(word in query.lower() for word in ['workout', 'exercise', 'fitness', 'gym', 'training']):
