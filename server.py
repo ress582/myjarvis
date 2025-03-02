@@ -332,7 +332,7 @@ def ask():
         f"     schedule/Team Meeting/tomorrow/14:30/Weekly project update\n"
         f"     schedule/Dentist/2024-03-15/09:00/Regular checkup\n"
         f"   - If any component is missing, ASK the user for it\n\n"
-        f" - NO MATTER WHAT UNLESS ABSOLUTELY NECCESARY YOU DO NOT ASK FOR INFORMATION NOT REQUIRED YOU ASSUME OR FIGURE OUT YOURSELF
+        f" - NO MATTER WHAT UNLESS ABSOLUTELY NECCESARY YOU DO NOT ASK FOR INFORMATION NOT REQUIRED YOU ASSUME OR FIGURE OUT YOURSELF\n"
         
         f"2. NOTIFICATIONS: You MUST handle notifications in this EXACT format:\n"
         f"   - When setting reminders or notifications\n"
