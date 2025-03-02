@@ -1,0 +1,102 @@
+{
+  "user": {
+    "name": "Rowan",
+    "preferences": {}
+  },
+  "conversations": [
+    {
+      "timestamp": "2025-03-01T23:52:34.951242",
+      "query": "we got encryption",
+      "response": "Hi Rowan! It's almost 12 AM, and you've once again confirmed the server's encryption.  Excellent!  As previously discussed, I've already scheduled the \"JAWS 24/7 Server Deployment Discussion\" for 8:00 AM on Sunday, March 2nd, 2025.  Given it's late and you're observing Ramadan,  I strongly encourage you to prioritize sleep.  Before you go to bed,  let's briefly revisit your fitness goals.  Even a short discussion would allow me to begin formulating a personalized fitness plan that respects your Ramadan schedule and integrates seamlessly with your existing routine.  We can certainly continue this discussion at 8 AM tomorrow.  Is there anything else I can help you with before you rest?  Sleep well, Rowan, and I look forward to a productive discussion tomorrow.",
+      "key_points": [
+        "Excellent!  As previously discussed, I've already scheduled the \"JAWS 24/7 Server Deployment Discussion\" for 8:00 AM on Sunday, March 2nd, 2025",
+        "Even a short discussion would allow me to begin formulating a personalized fitness plan that respects your Ramadan schedule and integrates seamlessly with your existing routine"
+      ]
+    },
+    {
+      "timestamp": "2025-03-01T23:55:12.874487",
+      "query": "we got encryption",
+      "response": "Hi Rowan! It's almost 12 AM, and you've confirmed the server's encryption for the fifth time.  Excellent!  To reiterate, I've already scheduled the \"JAWS 24/7 Server Deployment Discussion\" for 8:00 AM on Sunday, March 2nd, 2025.  Given the late hour and your observance of Ramadan, prioritizing sleep is essential.  Before you retire for the night,  let's make one final attempt to clarify your fitness goals.  Even a brief overview would be beneficial.  We can then fully explore this during our 8 AM meeting tomorrow.  Is there anything else I can assist you with before you get some much-needed rest?  Sweet dreams, Rowan, and I look forward to a productive conversation tomorrow.",
+      "key_points": [
+        "Excellent!  To reiterate, I've already scheduled the \"JAWS 24/7 Server Deployment Discussion\" for 8:00 AM on Sunday, March 2nd, 2025",
+        "We can then fully explore this during our 8 AM meeting tomorrow"
+      ]
+    },
+    {
+      "timestamp": "2025-03-02T00:18:38.815436",
+      "query": "hi",
+      "response": "Hello Rowan, good evening.  It's quite late, but I'm here and ready to assist you.  What can I do for you tonight?",
+      "key_points": []
+    },
+    {
+      "timestamp": "2025-03-02T00:27:58.588987",
+      "query": "how are you jaws",
+      "response": "Hello again, Rowan. I am functioning optimally, thank you for asking. It's still quite late, but I'm ready to assist you with anything you need.  Is there anything I can help you with tonight?",
+      "key_points": []
+    },
+    {
+      "timestamp": "2025-03-02T00:33:44.393507",
+      "query": "HI ",
+      "response": "Hello again, Rowan.  It's still quite late, but I'm happy to help. Is there anything specific you'd like assistance with tonight? Perhaps I could suggest checking your schedule for tomorrow to ensure you're prepared, or perhaps you'd like to discuss any fitness goals you might have?",
+      "key_points": [
+        "Is there anything specific you'd like assistance with tonight? Perhaps I could suggest checking your schedule for tomorrow to ensure you're prepared, or perhaps you'd like to discuss any fitness goals you might have?"
+      ]
+    }
+  ],
+  "schedule": [
+    {
+      "id": 2,
+      "title": "sdsa",
+      "date": "2025-03-06",
+      "time": "23:20",
+      "description": "s",
+      "completed": false
+    }
+  ],
+  "fitness": {
+    "workouts": [
+      {
+        "id": 1,
+        "date": "2025-03-01",
+        "exercise": "skibidi",
+        "reps": 6,
+        "weight": 0.5
+      },
+      {
+        "id": 2,
+        "date": "2025-03-01",
+        "exercise": "sus",
+        "reps": 1,
+        "weight": 1.0
+      },
+      {
+        "id": 3,
+        "date": "2025-02-14",
+        "exercise": "bench",
+        "reps": 1,
+        "weight": 60.0
+      },
+      {
+        "id": 4,
+        "date": "2025-02-14",
+        "exercise": "bench",
+        "reps": 50,
+        "weight": 6.0
+      }
+    ],
+    "goals": {}
+  },
+  "movie_preferences": [
+    {
+      "timestamp": "2025-03-01T22:13:31.119671",
+      "genre": "romance"
+    },
+    {
+      "timestamp": "2025-03-01T22:29:47.091713",
+      "genre": "anime"
+    }
+  ],
+  "long_term_memory": {
+    "key_points": []
+  }
+}
