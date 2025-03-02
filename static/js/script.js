@@ -1,5 +1,7 @@
 // Global variables for schedule management
 let currentScheduleSuggestion = null;
+let lastScheduleCheck = 0;
+const SCHEDULE_CHECK_INTERVAL = 30000; // Check every 30 seconds
 
 // Function to process AI response and detect scheduling information
 function processAIResponse(response) {
@@ -28,6 +30,77 @@ function showSchedulePopup(name, date, time, description) {
     
     // Show the popup
     document.getElementById('schedule-popup').style.display = 'flex';
+}
+
+// Function to show notification
+function showNotification(title, body) {
+    if (!('Notification' in window)) {
+        console.log('This browser does not support desktop notification');
+        return;
+    }
+
+    if (Notification.permission === 'granted') {
+        new Notification(title, { body });
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                new Notification(title, { body });
+            }
+        });
+    }
+}
+
+// Function to check for new schedules
+async function checkNewSchedules() {
+    const currentTime = Date.now();
+    if (currentTime - lastScheduleCheck < SCHEDULE_CHECK_INTERVAL) return;
+    
+    try {
+        const response = await fetch('/get_schedule');
+        const scheduleItems = await response.json();
+        
+        scheduleItems.forEach(item => {
+            if (item.name.toLowerCase().includes('notification')) {
+                const scheduleDateTime = new Date(`${item.date}T${item.time}`);
+                const timeDiff = scheduleDateTime.getTime() - currentTime;
+                
+                // Show notification 1 minute before the scheduled time
+                if (timeDiff > 0 && timeDiff <= 60000) { // 60000ms = 1 minute
+                    showNotification('Upcoming Notification', `${item.name} in 1 minute\n${item.description}`);
+                }
+                
+                // Show popup at the exact scheduled time (within a 5-second window)
+                if (timeDiff >= -5000 && timeDiff <= 5000) {
+                    showSchedulePopup(item.name, item.date, item.time, item.description);
+                }
+            }
+        });
+        
+        // Update schedule list
+        updateScheduleList(scheduleItems);
+        lastScheduleCheck = currentTime;
+    } catch (error) {
+        console.error('Error checking schedules:', error);
+    }
+}
+
+// Function to update schedule list
+function updateScheduleList(scheduleItems) {
+    const scheduleList = document.getElementById('schedule-list');
+    scheduleList.innerHTML = '';
+    
+    scheduleItems.forEach(item => {
+        const itemElement = document.createElement('div');
+        itemElement.className = 'schedule-item';
+        itemElement.innerHTML = `
+            <h4>${item.name}</h4>
+            <p><strong>Date:</strong> ${item.date}</p>
+            <p><strong>Time:</strong> ${item.time}</p>
+            <p>${item.description}</p>
+            <button class="delete-btn" onclick="deleteScheduleItem('${item.id}')">Delete</button>
+        `;
+        scheduleList.appendChild(itemElement);
+    });
 }
 
 // Function to add the suggested schedule item
@@ -150,7 +223,54 @@ async function deleteScheduleItem(id) {
     }
 }
 
-// Initialize schedule list when page loads
+// Initialize schedule list and notification permission when page loads
 document.addEventListener('DOMContentLoaded', () => {
     getScheduleItems();
+    
+    // Request notification permission
+    if ('Notification' in window) {
+        Notification.requestPermission();
+    }
+    
+    // Start periodic schedule checking
+    setInterval(checkNewSchedules, SCHEDULE_CHECK_INTERVAL);
+});
+
+// Function to check upcoming schedule items and send notifications
+async function checkUpcomingSchedule() {
+    const password = document.getElementById('password').value;
+    if (!password) return;
+
+    try {
+        const response = await fetch(`/schedule?password=${encodeURIComponent(password)}`);
+        const data = await response.json();
+        
+        if (data.items) {
+            const now = new Date();
+            data.items.forEach(item => {
+                const eventTime = new Date(`${item.date}T${item.time}`);
+                const timeDiff = eventTime - now;
+                
+                // Notify 15 minutes before the event
+                if (timeDiff > 0 && timeDiff <= 15 * 60 * 1000) {
+                    showNotification(
+                        'Upcoming Event',
+                        `${item.title} starts in ${Math.round(timeDiff / 60000)} minutes`
+                    );
+                }
+            });
+        }
+    } catch (error) {
+        console.error('Error checking upcoming schedule:', error);
+    }
+}
+
+// Start periodic schedule checks
+setInterval(checkUpcomingSchedule, 60000); // Check every minute
+
+// Request notification permission when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    if ('Notification' in window) {
+        Notification.requestPermission();
+    }
 });
