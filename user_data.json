@@ -8,5 +8,6 @@
         "movie_preferences": [],
         "schedule_preferences": {}
     },
+    "conversations": [],
     "last_interaction": null
 }
