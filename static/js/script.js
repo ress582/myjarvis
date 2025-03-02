@@ -60,19 +60,28 @@ async function checkNewSchedules() {
         const scheduleItems = await response.json();
         
         scheduleItems.forEach(item => {
-            if (item.name.toLowerCase().includes('notification')) {
-                const scheduleDateTime = new Date(`${item.date}T${item.time}`);
-                const timeDiff = scheduleDateTime.getTime() - currentTime;
-                
-                // Show notification 1 minute before the scheduled time
-                if (timeDiff > 0 && timeDiff <= 60000) { // 60000ms = 1 minute
-                    showNotification('Upcoming Notification', `${item.name} in 1 minute\n${item.description}`);
+            const scheduleDateTime = new Date(`${item.date}T${item.time}`);
+            const timeDiff = scheduleDateTime.getTime() - currentTime;
+            
+            // Show notifications at different intervals
+            if (timeDiff > 0) {
+                // 15 minutes before
+                if (timeDiff <= 900000 && timeDiff > 840000) { // 15 minutes = 900000ms
+                    showNotification('Upcoming Event', `${item.name} in 15 minutes\n${item.description}`);
                 }
-                
-                // Show popup at the exact scheduled time (within a 5-second window)
-                if (timeDiff >= -5000 && timeDiff <= 5000) {
-                    showSchedulePopup(item.name, item.date, item.time, item.description);
+                // 5 minutes before
+                else if (timeDiff <= 300000 && timeDiff > 240000) { // 5 minutes = 300000ms
+                    showNotification('Upcoming Event', `${item.name} in 5 minutes\n${item.description}`);
                 }
+                // 1 minute before
+                else if (timeDiff <= 60000 && timeDiff > 55000) { // 1 minute = 60000ms
+                    showNotification('Upcoming Event', `${item.name} in 1 minute\n${item.description}`);
+                }
+            }
+            
+            // Show popup at the exact scheduled time (within a 5-second window)
+            if (timeDiff >= -5000 && timeDiff <= 5000) {
+                showSchedulePopup(item.name, item.date, item.time, item.description);
             }
         });
         
