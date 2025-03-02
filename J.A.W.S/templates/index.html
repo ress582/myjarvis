@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>J.A.W.S. AI Assistant</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div class="container">
+        <h1 class="welcome-text">Welcome to J.A.W.S.</h1>
+        <div class="jarvis-orb" title="Click to start voice interaction">
+            <div class="orb-sphere"></div>
+            <div class="ferro-blob"></div>
+            <div class="ferro-blob"></div>
+            <div class="magnetic-field"></div>
+            <div class="audio-wave"></div>
+        </div>
+        <div id="subtitle" class="subtitle">Ready to assist you, Rowan...</div>
+        
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input type="text" id="query" placeholder="How can I help you today?" aria-label="Query input">
+                <input type="password" id="password" placeholder="Enter your access code" aria-label="Password input">
+            </div>
+            
+            <div class="button-group">
+                <button class="voice-btn" onclick="toggleVoiceInput()" aria-label="Toggle voice recording">
+                    <i class="fas fa-microphone"></i> Start Recording
+                </button>
+                <button onclick="sendQuery()" aria-label="Send query">
+                    <i class="fas fa-paper-plane"></i> Send Query
+                </button>
+            </div>
+        </div>
+
+        <div id="response" role="region" aria-live="polite" aria-label="AI response"></div>
+        
+        <div class="ai-suggestions-container">
+            <h3>AI Suggestions for Your Routine</h3>
+            <button onclick="getAISuggestions()"><i class="fas fa-lightbulb"></i> Get Suggestions</button>
+            <div id="ai-suggestions"></div>
+        </div>
+        
+        <div class="features-container">
+            <div class="feature-tabs">
+                <button class="tab-btn active" onclick="openTab('schedule', event)"><i class="fas fa-calendar"></i> Schedule</button>
+                <button class="tab-btn" onclick="openTab('fitness', event)"><i class="fas fa-dumbbell"></i> Fitness</button>
+                <button class="tab-btn" onclick="openTab('movies', event)"><i class="fas fa-film"></i> Movies</button>
+                <button class="tab-btn" onclick="openTab('weather', event)"><i class="fas fa-cloud-sun"></i> Weather</button>
+                
+            </div>
+            
+            <div id="schedule" class="feature-content active">
+                <h2>Schedule Manager</h2>
+                <div class="schedule-form">
+                    <input type="text" id="schedule-title" placeholder="Event title">
+                    <input type="date" id="schedule-date">
+                    <input type="time" id="schedule-time">
+                    <textarea id="schedule-description" placeholder="Description (optional)"></textarea>
+                    <button onclick="addScheduleItem()"><i class="fas fa-plus"></i> Add Event</button>
+                </div>
+                <div class="schedule-view">
+                    <h3>Upcoming Events</h3>
+                    <div id="schedule-list"></div>
+                </div>
+            </div>
+            
+            <div id="fitness" class="feature-content">
+                <h2>Fitness Tracker</h2>
+                <div class="fitness-form">
+                    <input type="text" id="fitness-exercise" placeholder="Exercise name">
+                    <input type="number" id="fitness-reps" placeholder="Reps">
+                    <input type="number" id="fitness-weight" placeholder="Weight (kg)" step="0.5">
+                    <input type="date" id="fitness-date">
+                    <button onclick="addWorkout()"><i class="fas fa-plus"></i> Add Workout</button>
+                </div>
+                <div class="fitness-progress">
+                    <h3>Progress Tracker</h3>
+                    <input type="text" id="progress-exercise" placeholder="Exercise name">
+                    <button onclick="checkProgress()"><i class="fas fa-chart-line"></i> Check Progress</button>
+                    <button onclick="getFitnessAdvice()"><i class="fas fa-dumbbell"></i> Get Fitness Advice</button>
+                    <div id="progress-results"></div>
+                </div>
+            </div>
+            
+            <div id="movies" class="feature-content">
+                <h2>Movie Recommendations</h2>
+                <div class="movie-form">
+                    <input type="text" id="movie-genre" placeholder="Genre you like">
+                    <input type="text" id="movie-title" placeholder="Movie title (optional)">
+                    <input type="number" id="movie-rating" placeholder="Rating (1-10)" min="1" max="10">
+                    <button onclick="addMoviePreference()"><i class="fas fa-plus"></i> Add Preference</button>
+                </div>
+                <div class="movie-recommendations">
+                    <h3>Your Recommendations</h3>
+                    <button onclick="getMovieRecommendations()"><i class="fas fa-film"></i> Get Recommendations</button>
+                    <div id="recommendations-list"></div>
+                </div>
+            </div>
+            
+            
+
+            <div id="weather" class="feature-content">
+                <h2>Weather Information</h2>
+                <div class="weather-form">
+                    <input type="text" id="weather-city" placeholder="Enter city name (e.g., London,uk)">
+                    <select id="weather-units">
+                        <option value="metric">Celsius</option>
+                        <option value="imperial">Fahrenheit</option>
+                    </select>
+                    <button onclick="getCurrentWeather()"><i class="fas fa-cloud-sun"></i> Get Current Weather</button>
+                    <button onclick="getWeatherForecast()"><i class="fas fa-calendar-alt"></i> Get 5-Day Forecast</button>
+                </div>
+                <div class="weather-results">
+                    <div id="current-weather" class="weather-card"></div>
+                    <div id="weather-forecast" class="forecast-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isRecording = false;
+        
+
+        let mediaRecorder;
+        let audioChunks = [];
+        let silenceTimer = null;
+        let lastAudioLevel = 0;
+        const SILENCE_THRESHOLD = 0.01;
+        const SILENCE_DURATION = 2000;
+        let password = "";
+
+        async function toggleVoiceInput() {
+            if (!isRecording) {
+                try {
+                    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        throw new Error('Your browser does not support media devices. Please use a modern browser with microphone support.');
+                    }
+                    const stream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 16000
+                        }
+                    });
+                    
+                    // Use a widely supported MIME type or let the browser choose the default
+                    let mimeType = 'audio/webm';
+                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        mimeType = 'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')) {
+                        mimeType = 'audio/ogg;codecs=opus';
+                    }
+                    
+                    mediaRecorder = new MediaRecorder(stream, {
+                        mimeType: mimeType
+                    });
+                    
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            audioChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                        const formData = new FormData();
+                        formData.append('audio', audioBlob, 'recording.wav');
+                        formData.append('password', document.getElementById('password').value);
+
+                        try {
+                            const response = await fetch('/upload-audio', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            });
+
+                            if (!response.ok) {
+                                const errorData = await response.json();
+                                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                            }
+
+                            const result = await response.json();
+                            if (result.text) {
+                                document.getElementById('query').value = result.text;
+                                sendQuery();
+                            } else {
+                                document.getElementById('subtitle').textContent = 'Could not process audio. Please try again.';
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            // Provide more helpful guidance to the user
+                            if (error.message && error.message.includes('Could not transcribe audio')) {
+                                document.getElementById('subtitle').textContent = 'Speech not recognized. Please speak louder and more clearly.';
+                                document.getElementById('response').textContent = 'Try these tips:\n- Speak closer to the microphone\n- Reduce background noise\n- Speak more slowly and clearly';
+                            } else {
+                                document.getElementById('subtitle').textContent = error.message || 'Error processing voice input. Please try again.';
+                            }
+                        }
+                    };
+
+                    const audioContext = new AudioContext();
+                    const analyser = audioContext.createAnalyser();
+                    const microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
+                    analyser.fftSize = 256;
+                    const bufferLength = analyser.frequencyBinCount;
+                    const dataArray = new Uint8Array(bufferLength);
+
+                    function checkAudioLevel() {
+                        analyser.getByteFrequencyData(dataArray);
+                        const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+                        const normalizedLevel = average / 256;
+                        
+                        document.getElementById('subtitle').style.opacity = normalizedLevel > SILENCE_THRESHOLD ? '1' : '0.5';
+                        document.getElementById('subtitle').textContent = 'Listening...';
+                        
+                        if (normalizedLevel < SILENCE_THRESHOLD && lastAudioLevel >= SILENCE_THRESHOLD) {
+                            if (silenceTimer === null) {
+                                silenceTimer = setTimeout(() => {
+                                    if (isRecording) {
+                                        toggleVoiceInput();
+                                    }
+                                    silenceTimer = null;
+                                }, SILENCE_DURATION);
+                            }
+                        } else if (normalizedLevel >= SILENCE_THRESHOLD) {
+                            if (silenceTimer !== null) {
+                                clearTimeout(silenceTimer);
+                                silenceTimer = null;
+                            }
+                        }
+                        
+                        lastAudioLevel = normalizedLevel;
+                        if (isRecording) {
+                            requestAnimationFrame(checkAudioLevel);
+                        }
+                    }
+                    
+                    checkAudioLevel();
+                    mediaRecorder.start(100);
+                    isRecording = true;
+                    document.querySelector('.voice-btn').innerHTML = '<i class="fas fa-stop"></i> Stop Recording';
+                    document.querySelector('.voice-btn').classList.add('recording');
+                    document.querySelector('.jarvis-orb').classList.add('recording');
+                    document.getElementById('subtitle').textContent = 'Listening...';
+                } catch (err) {
+                    console.error('Error accessing microphone:', err);
+                    document.getElementById('subtitle').textContent = 'Error accessing microphone. Please check permissions.';
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                document.querySelector('.voice-btn').innerHTML = '<i class="fas fa-microphone"></i> Start Recording';
+                document.querySelector('.voice-btn').classList.remove('recording');
+                document.querySelector('.jarvis-orb').classList.remove('recording');
+                document.getElementById('subtitle').textContent = 'Processing...';
+            }
+        }
+
+        async function sendQuery() {
+            const query = document.getElementById('query').value;
+            password = document.getElementById('password').value;
+            
+            if (!query.trim()) {
+                document.getElementById('subtitle').textContent = 'Please enter a query.';
+                return;
+            }
+
+            document.getElementById('subtitle').textContent = 'Processing...';
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query, password })
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    document.getElementById('subtitle').textContent = data.error;
+                    document.getElementById('response').textContent = `Error: ${data.error}`;
+                } else {
+                    document.getElementById('subtitle').textContent = 'Response ready';
+                    document.getElementById('response').textContent = data.response;
+                    
+                    // Check for appointment mentions in the query and response
+                    checkForAppointment(query, data.response);
+                    
+                    // Check for fitness advice in the response
+                    checkForFitnessAdvice(data.response);
+                    
+                    if (data.audio_file) {
+                        const audio = new Audio(data.audio_file);
+                        document.querySelector('.jarvis-orb').classList.add('speaking');
+                        audio.play();
+                        audio.onended = () => {
+                            document.querySelector('.jarvis-orb').classList.remove('speaking');
+                            document.getElementById('subtitle').textContent = 'Ready to assist, Rowan...';
+                            
+                            // Delete the audio file after playback
+                            fetch('/delete-audio', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ 
+                                    audio_file: data.audio_file,
+                                    password: password
+                                })
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(data => {
+                                        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+                                    });
+                                }
+                                return response.json();
+                            })
+                            .then(result => {
+                                console.log('Audio file deleted successfully:', data.audio_file);
+                            })
+                            .catch(err => {
+                                console.error('Error deleting audio file:', err);
+                                // Log the file path that failed to delete
+                                console.error('Failed to delete:', data.audio_file);
+                            });
+                        };
+                    }
+                }
+            } catch (error) {
+                console.error('Error during query:', error);
+                document.getElementById('subtitle').textContent = 'Network error. Please try again.';
+                document.getElementById('response').textContent = 'Failed to communicate with the server. Please try again.';
+            }
+        }
+        
+        // Function to check for appointment mentions and suggest adding to schedule
+        function checkForAppointment(query, response) {
+            // Check if the query contains appointment-related keywords
+            const appointmentKeywords = ['appointment', 'meeting', 'schedule', 'event', 'reminder'];
+            const timePattern = /\b(?:at|on|for)\s+(?:\d{1,2}(?::\d{2})?\s*(?:am|pm|AM|PM)|\d{1,2}(?::\d{2})?)\b/i;
+            const datePattern = /\b(?:today|tomorrow|next\s+\w+|\d{1,2}(?:st|nd|rd|th)?\s+(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?))\b/i;
+            
+            const hasAppointment = appointmentKeywords.some(keyword => query.toLowerCase().includes(keyword) || response.toLowerCase().includes(keyword));
+            const hasTime = timePattern.test(query) || timePattern.test(response);
+            const hasDate = datePattern.test(query) || datePattern.test(response);
+            
+            if (hasAppointment && (hasTime || hasDate)) {
+                // Extract potential appointment details
+                let title = "";
+                let date = "";
+                let time = "";
+                
+                // Try to extract title (simple approach - can be enhanced)
+                const titleMatch = query.match(/(?:about|regarding|for|with)\s+([^,.]+)/i);
+                if (titleMatch) {
+                    title = titleMatch[1].trim();
+                } else {
+                    // Default title based on keywords
+                    appointmentKeywords.forEach(keyword => {
+                        if (query.toLowerCase().includes(keyword)) {
+                            title = keyword.charAt(0).toUpperCase() + keyword.slice(1);
+                            return;
+                        }
+                    });
+                }
+                
+                // Try to extract date
+                const todayMatch = query.match(/today/i);
+                const tomorrowMatch = query.match(/tomorrow/i);
+                const dateMatch = query.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\b/i);
+                
+                const today = new Date();
+                if (todayMatch) {
+                    date = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+                } else if (tomorrowMatch) {
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    date = tomorrow.toISOString().split('T')[0];
+                } else if (dateMatch) {
+                    // This is a simplified date parsing - could be enhanced
+                    const day = parseInt(dateMatch[1]);
+                    const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+                    const monthAbbr = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+                    
+                    let month;
+                    const monthStr = dateMatch[2].toLowerCase();
+                    if (monthNames.includes(monthStr)) {
+                        month = monthNames.indexOf(monthStr);
+                    } else {
+                        month = monthAbbr.indexOf(monthStr);
+                    }
+                    
+                    if (month !== -1) {
+                        const year = today.getFullYear();
+                        const dateObj = new Date(year, month, day);
+                        date = dateObj.toISOString().split('T')[0];
+                    }
+                }
+                
+                // Try to extract time
+                const timeMatch = query.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm|AM|PM)?\b/);
+                if (timeMatch) {
+                    let hours = parseInt(timeMatch[1]);
+                    const minutes = timeMatch[2] ? timeMatch[2] : "00";
+                    const period = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+                    
+                    // Convert to 24-hour format if needed
+                    if (period === "pm" && hours < 12) {
+                        hours += 12;
+                    } else if (period === "am" && hours === 12) {
+                        hours = 0;
+                    }
+                    
+                    // Format time as HH:MM
+                    time = `${hours.toString().padStart(2, '0')}:${minutes}`;
+                }
+                
+                // Create appointment suggestion UI
+                if (title || date || time) {
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.className = 'appointment-suggestion';
+                    suggestionDiv.innerHTML = `
+                        <h4>I detected a potential appointment. Would you like to add it to your schedule?</h4>
+                        <div class="appointment-form">
+                            <input type="text" id="suggested-title" placeholder="Title" value="${title}">
+                            <input type="date" id="suggested-date" value="${date}">
+                            <input type="time" id="suggested-time" value="${time}">
+                            <textarea id="suggested-description" placeholder="Description"></textarea>
+                            <div class="suggestion-buttons">
+                                <button onclick="addSuggestedAppointment()">Add to Schedule</button>
+                                <button onclick="dismissSuggestion()">Dismiss</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add the suggestion after the response
+                    const responseDiv = document.getElementById('response');
+                    if (document.querySelector('.appointment-suggestion')) {
+                        document.querySelector('.appointment-suggestion').remove();
+                    }
+                    responseDiv.after(suggestionDiv);
+                    
+                    // Auto-switch to schedule tab
+                    openTab('schedule', null);
+                }
+            }
+        }
+        
+        // Function to add the suggested appointment to the schedule
+        async function addSuggestedAppointment() {
+            const title = document.getElementById('suggested-title').value;
+            const date = document.getElementById('suggested-date').value;
+            const time = document.getElementById('suggested-time').value;
+            const description = document.getElementById('suggested-description').value;
+            
+            if (!title || !date || !time) {
+                alert('Please fill in all required fields (title, date, time)');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/schedule', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title, date, time, description, password })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('Appointment added to your schedule!');
+                    document.querySelector('.appointment-suggestion').remove();
+                    loadSchedule();
+                }
+            } catch (error) {
+                alert('Failed to add appointment. Please try again.');
+            }
+        }
+        
+        // Function to dismiss the appointment suggestion
+        function dismissSuggestion() {
+            document.querySelector('.appointment-suggestion').remove();
+        }
+        
+        // Function to check for fitness advice in the response
+        function checkForFitnessAdvice(response) {
+            // Removed automatic tab switching to prevent false positives
+            // Now the user must explicitly click the "Get Fitness Advice" button
+            // This prevents unwanted tab switching when fitness keywords appear in general responses
+            return;
+        }
+
+        // Feature tab functionality
+        function openTab(tabName, event) {
+            const tabs = document.getElementsByClassName('feature-content');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            
+            const tabBtns = document.getElementsByClassName('tab-btn');
+            for (let i = 0; i < tabBtns.length; i++) {
+                tabBtns[i].classList.remove('active');
+            }
+            
+            document.getElementById(tabName).classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            }
+        }
+
+        // Function to get fitness advice
+        async function getFitnessAdvice() {
+            const password = document.getElementById('password').value;
+            const resultsDiv = document.getElementById('progress-results');
+            resultsDiv.innerHTML = '<p>Loading fitness advice...</p>';
+            
+            try {
+                const response = await fetch(`/fitness/advice?password=${encodeURIComponent(password)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    resultsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                resultsDiv.innerHTML = `
+                    <div class="advice-card">
+                        <h4>Your Fitness Analysis</h4>
+                        <p>${data.advice}</p>
+                        <div class="recommendations">
+                            <h5>Recommendations:</h5>
+                            <ul>
+                                ${data.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error getting fitness advice:', error);
+                resultsDiv.innerHTML = '<p class="error">Failed to get fitness advice. Please try again.</p>';
+            }
+        }
+
+        // Schedule functions
+        async function addScheduleItem() {
+            const title = document.getElementById('schedule-title').value;
+            const date = document.getElementById('schedule-date').value;
+            const time = document.getElementById('schedule-time').value;
+            const description = document.getElementById('schedule-description').value;
+            
+            if (!title || !date || !time) {
+                alert('Please fill in the required fields (title, date, time)');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/schedule', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ title, date, time, description, password })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('Schedule item added successfully!');
+                    document.getElementById('schedule-title').value = '';
+                    document.getElementById('schedule-description').value = '';
+                    loadSchedule();
+                }
+            } catch (error) {
+                console.error('Error adding schedule item:', error);
+                alert('Failed to add schedule item. Please try again.');
+            }
+        }
+
+        async function deleteScheduleItem(itemId) {
+            if (!confirm('Are you sure you want to delete this schedule item?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/schedule/${itemId}?password=${encodeURIComponent(password)}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                alert('Schedule item deleted successfully!');
+                loadSchedule();
+            } catch (error) {
+                console.error('Error deleting schedule item:', error);
+                alert('Failed to delete schedule item. Please try again.');
+            }
+        }
+        
+        async function loadSchedule() {
+            const today = new Date().toISOString().split('T')[0];
+            try {
+                const response = await fetch(`/schedule/${today}?password=${password}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('schedule-list').innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                const scheduleList = document.getElementById('schedule-list');
+                scheduleList.innerHTML = '';
+                
+                if (data.schedule.length === 0) {
+                    scheduleList.innerHTML = '<p>No events scheduled for today.</p>';
+                    return;
+                }
+                
+                data.schedule.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'schedule-item';
+                    itemElement.innerHTML = `
+                        <h4>${item.title}</h4>
+                        <p><strong>Time:</strong> ${item.time}</p>
+                        <p>${item.description || 'No description'}</p>
+                        <p class="status ${item.completed ? 'completed' : 'pending'}">Status: ${item.completed ? 'Completed' : 'Pending'}</p>
+                        <button class="delete-btn" onclick="deleteScheduleItem(${item.id})"><i class="fas fa-trash"></i> Delete</button>
+                    `;
+                    scheduleList.appendChild(itemElement);
+                });
+            } catch (error) {
+                document.getElementById('schedule-list').innerHTML = '<p class="error">Failed to load schedule. Please try again.</p>';
+            }
+        }
+        
+        // Delete schedule item function
+        async function deleteScheduleItem(itemId) {
+            if (!confirm('Are you sure you want to delete this schedule item?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/schedule/${itemId}?password=${password}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('Schedule item deleted successfully!');
+                    loadSchedule();
+                }
+            } catch (error) {
+                alert('Failed to delete schedule item. Please try again.');
+            }
+        }
+        
+        // Delete workout function
+        async function deleteWorkout(workoutId) {
+            if (!confirm('Are you sure you want to delete this workout?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/fitness/workout/${workoutId}?password=${password}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('Workout deleted successfully!');
+                    loadWorkouts();
+                }
+            } catch (error) {
+                alert('Failed to delete workout. Please try again.');
+            }
+        }
+        
+        // Weather functions
+        async function getCurrentWeather() {
+            const city = document.getElementById('weather-city').value;
+            const units = document.getElementById('weather-units').value;
+            
+            if (!city) {
+                alert('Please enter a city name');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/weather/current?city=${encodeURIComponent(city)}&units=${units}&password=${password}`);
+                const data = await response.json();
+                
+                const weatherDiv = document.getElementById('current-weather');
+                
+                if (data.error) {
+                    weatherDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                // Get temperature unit symbol
+                const tempUnit = units === 'metric' ? '°C' : '°F';
+                const speedUnit = units === 'metric' ? 'm/s' : 'mph';
+                
+                // Create weather card
+                weatherDiv.innerHTML = `
+                    <div class="weather-header">
+                        <h3>${data.location.city}, ${data.location.country}</h3>
+                        <p class="weather-time">As of ${data.dt}</p>
+                    </div>
+                    <div class="weather-body">
+                        <div class="weather-icon">
+                            <img src="https://openweathermap.org/img/wn/${data.weather.icon}@2x.png" alt="${data.weather.description}">
+                            <p>${data.weather.description}</p>
+                        </div>
+                        <div class="weather-temp">
+                            <h2>${data.temperature.current}${tempUnit}</h2>
+                            <p>Feels like: ${data.temperature.feels_like}${tempUnit}</p>
+                        </div>
+                        <div class="weather-details">
+                            <p><i class="fas fa-wind"></i> Wind: ${data.wind.speed} ${speedUnit}</p>
+                            <p><i class="fas fa-tint"></i> Humidity: ${data.humidity}%</p>
+                            <p><i class="fas fa-compress-alt"></i> Pressure: ${data.pressure} hPa</p>
+                            <p><i class="fas fa-eye"></i> Visibility: ${data.visibility} km</p>
+                        </div>
+                        <div class="weather-sun">
+                            <p><i class="fas fa-sun"></i> Sunrise: ${data.sunrise}</p>
+                            <p><i class="fas fa-moon"></i> Sunset: ${data.sunset}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('current-weather').innerHTML = '<p class="error">Failed to get weather data. Please try again.</p>';
+            }
+        }
+        
+        async function getWeatherForecast() {
+            const city = document.getElementById('weather-city').value;
+            const units = document.getElementById('weather-units').value;
+            
+            if (!city) {
+                alert('Please enter a city name');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/weather/forecast?city=${encodeURIComponent(city)}&units=${units}&password=${password}`);
+                const data = await response.json();
+                
+                const forecastDiv = document.getElementById('weather-forecast');
+                
+                if (data.error) {
+                    forecastDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                // Get temperature unit symbol
+                const tempUnit = units === 'metric' ? '°C' : '°F';
+                
+                // Create forecast cards
+                let forecastHTML = '<h3>5-Day Forecast</h3><div class="forecast-cards">';
+                
+                data.forecast.forEach(day => {
+                    forecastHTML += `
+                        <div class="forecast-day">
+                            <h4>${day.day_name}</h4>
+                            <p class="forecast-date">${day.date}</p>
+                            <img src="https://openweathermap.org/img/wn/${day.weather.icon}@2x.png" alt="${day.weather.description}">
+                            <p class="forecast-desc">${day.weather.description}</p>
+                            <p class="forecast-temp">${day.temperature.min}${tempUnit} - ${day.temperature.max}${tempUnit}</p>
+                            <p class="forecast-precip"><i class="fas fa-umbrella"></i> ${day.precipitation_probability}%</p>
+                        </div>
+                    `;
+                });
+                
+                forecastHTML += '</div>';
+                forecastDiv.innerHTML = forecastHTML;
+            } catch (error) {
+                document.getElementById('weather-forecast').innerHTML = '<p class="error">Failed to get forecast data. Please try again.</p>';
+            }
+        }
+        
+        // Get AI suggestions
+        async function getAISuggestions() {
+            try {
+                const response = await fetch(`/ai/suggestions?password=${password}`);
+                const data = await response.json();
+                
+                const suggestionsDiv = document.getElementById('ai-suggestions');
+                
+                if (data.error) {
+                    suggestionsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                if (!data.suggestions || data.suggestions.length === 0) {
+                    suggestionsDiv.innerHTML = '<p>No suggestions available at this time.</p>';
+                    return;
+                }
+                
+                let suggestionsHTML = '<div class="suggestions-list">';
+                data.suggestions.forEach(suggestion => {
+                    suggestionsHTML += `
+                        <div class="suggestion-card">
+                            <h4>${suggestion.title}</h4>
+                            <p>${suggestion.description}</p>
+                        </div>
+                    `;
+                });
+                suggestionsHTML += '</div>';
+                
+                suggestionsDiv.innerHTML = suggestionsHTML;
+            } catch (error) {
+                document.getElementById('ai-suggestions').innerHTML = '<p class="error">Failed to get AI suggestions. Please try again.</p>';
+            }
+        }
+        
+        // Load workouts function
+        async function loadWorkouts() {
+            try {
+                // This would need a new endpoint to get all workouts
+                // For now, we'll just clear the form
+                document.getElementById('fitness-exercise').value = '';
+                document.getElementById('fitness-reps').value = '';
+                document.getElementById('fitness-weight').value = '';
+            } catch (error) {
+                console.error('Error loading workouts:', error);
+            }
+        }
+        
+        // Fitness functions
+        async function addWorkout() {
+            const exercise = document.getElementById('fitness-exercise').value;
+            const reps = document.getElementById('fitness-reps').value;
+            const weight = document.getElementById('fitness-weight').value;
+            const date = document.getElementById('fitness-date').value || new Date().toISOString().split('T')[0];
+            
+            if (!exercise || !reps || !weight) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/fitness/workout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ exercise, reps, weight, date, password })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('Workout added successfully!');
+                    document.getElementById('fitness-exercise').value = '';
+                    document.getElementById('fitness-reps').value = '';
+                    document.getElementById('fitness-weight').value = '';
+                }
+            } catch (error) {
+                alert('Failed to add workout. Please try again.');
+            }
+        }
+        
+        async function checkProgress() {
+            const exercise = document.getElementById('progress-exercise').value;
+            password = document.getElementById('password').value;
+            
+            if (!exercise) {
+                alert('Please enter an exercise name');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('progress-results');
+            resultsDiv.innerHTML = '<p>Loading progress data...</p>';
+            
+            try {
+                const response = await fetch(`/fitness/progress/${encodeURIComponent(exercise)}?password=${encodeURIComponent(password)}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.error || data.status === 'insufficient_data') {
+                    resultsDiv.innerHTML = `<p class="error">${data.error || data.message}</p>`;
+                    return;
+                }
+                
+                let statusClass = data.on_track ? 'positive' : 'negative';
+                let statusMessage = data.on_track ? 'You\'re making good progress!' : 'You need to push harder!';
+                
+                resultsDiv.innerHTML = `
+                    <div class="progress-card">
+                        <h4>${data.exercise}</h4>
+                        <p>From ${data.first_date} to ${data.latest_date}</p>
+                        <p>Weight change: ${data.weight_change.toFixed(1)} kg (${data.weight_change_percent.toFixed(1)}%)</p>
+                        <p>Reps change: ${data.reps_change} (${data.reps_change_percent.toFixed(1)}%)</p>
+                        <p>Volume change: ${data.volume_change_percent.toFixed(1)}%</p>
+                        <p class="status ${statusClass}">${statusMessage}</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error checking fitness progress:', error);
+                document.getElementById('progress-results').innerHTML = '<p class="error">Failed to check progress. Please try again.</p>';
+            }
+        }
+        
+        // Movie functions
+        async function addMoviePreference() {
+            const genre = document.getElementById('movie-genre').value;
+            const title = document.getElementById('movie-title').value;
+            const rating = document.getElementById('movie-rating').value;
+            
+            if (!genre) {
+                alert('Please enter at least a genre');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/movies/preference', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ genre, title, rating, password })
+                });
+                
+                const data = await response.json();
+                if (data.error) {
+                    alert(`Error: ${data.error}`);
+                } else {
+                    alert('Movie preference added successfully!');
+                    document.getElementById('movie-genre').value = '';
+                    document.getElementById('movie-title').value = '';
+                    document.getElementById('movie-rating').value = '';
+                }
+            } catch (error) {
+                alert('Failed to add movie preference. Please try again.');
+            }
+        }
+        
+        async function getMovieRecommendations() {
+            try {
+                const response = await fetch(`/movies/recommendations?password=${password}`);
+                const data = await response.json();
+                
+                const recommendationsDiv = document.getElementById('recommendations-list');
+                
+                if (data.error) {
+                    recommendationsDiv.innerHTML = `<p class="error">${data.error}</p>`;
+                    return;
+                }
+                
+                if (!data.preferred_genres || data.preferred_genres.length === 0) {
+                    recommendationsDiv.innerHTML = '<p>No preferences found. Add some movie preferences first!</p>';
+                    return;
+                }
+                
+                let recommendationsHTML = `
+                    <div class="recommendations-card">
+                        <h4>Based on your preferences</h4>
+                        <p>Your top genres:</p>
+                        <ul>
+                            ${data.preferred_genres.map(genre => `<li>${genre}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                if (data.recommendations && data.recommendations.length > 0) {
+                    recommendationsHTML += '<div class="movie-recommendations-list">';
+                    data.recommendations.forEach(movie => {
+                        recommendationsHTML += `
+                            <div class="movie-card">
+                                <h4>${movie.title}</h4>
+                                <p><strong>Genre:</strong> ${movie.genre}</p>
+                                <p>${movie.description}</p>
+                            </div>
+                        `;
+                    });
+                    recommendationsHTML += '</div>';
+                } else {
+                    recommendationsHTML += '<p>Click the button again to get personalized movie recommendations!</p>';
+                }
+                
+                recommendationsDiv.innerHTML = recommendationsHTML;
+            } catch (error) {
+                document.getElementById('recommendations-list').innerHTML = '<p class="error">Failed to get recommendations. Please try again.</p>';
+            }
+        }
+        
+        // Initialize with ready state and load schedule
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('subtitle').textContent = 'Ready to assist, Rowan...';
+            // Set today's date as default for date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('schedule-date').value = today;
+            document.getElementById('fitness-date').value = today;
+            
+            // If password is saved in session, load schedule
+            if (sessionStorage.getItem('jaws_password')) {
+                document.getElementById('password').value = sessionStorage.getItem('jaws_password');
+                password = sessionStorage.getItem('jaws_password');
+                loadSchedule();
+                getAISuggestions();
+            }
+        });
+    </script>
+</body>
+</html>
