@@ -1,13 +1,46 @@
 {
-    "schedules": [],
-    "fitness_data": {
-        "goals": [],
-        "progress": []
-    },
-    "preferences": {
-        "movie_preferences": [],
-        "schedule_preferences": {}
+    "user": {
+        "name": "Rowan",
+        "preferences": {}
     },
     "conversations": [],
+    "schedules": [],
+    "fitness_data": {
+        "goals": {},
+        "progress": [],
+        "workouts": [
+
+            {
+                "id": 3,
+                "date": "2025-02-14",
+                "exercise": "bench",
+                "reps": 1,
+                "weight": 60.0
+            },
+            {
+                "id": 4,
+                "date": "2025-02-14",
+                "exercise": "bench",
+                "reps": 50,
+                "weight": 6.0
+            }
+        ]
+    },
+    "preferences": {
+        "movie_preferences": [
+            {
+                "timestamp": "2025-03-01T22:13:31.119671",
+                "genre": "romance"
+            },
+            {
+                "timestamp": "2025-03-01T22:29:47.091713",
+                "genre": "anime"
+            }
+        ],
+        "schedule_preferences": {}
+    },
+    "long_term_memory": {
+        "key_points": []
+    },
     "last_interaction": null
 }
