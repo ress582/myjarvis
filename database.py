@@ -6,9 +6,12 @@ from typing import Dict, List, Any, Optional
 class Database:
     """Database class for storing user data, conversation history, schedules, and fitness tracking."""
     
-    def __init__(self, db_file="user_data.json"):
+    def __init__(self, db_file="user_data.json", cache_timeout=300):
         self.db_file = db_file
         self.data = self._load_data()
+        self.cache = {}
+        self.cache_timestamps = {}
+        self.cache_timeout = cache_timeout  # Cache timeout in seconds
         
         # Initialize default data structure if it doesn't exist
         if not self.data:
